@@ -1,9 +1,45 @@
 // Initialize Telegram WebApp
 const tg = window.Telegram.WebApp;
 
-// Enable main button and set theme
-tg.expand();
-tg.enableClosingConfirmation();
+// Проверяем, что мы находимся в Telegram WebApp
+if (!tg) {
+    console.error('Telegram WebApp is not available');
+    // Можно показать сообщение пользователю или перенаправить на другую страницу
+    document.body.innerHTML = '<div class="error-message">Это приложение должно быть открыто в Telegram</div>';
+} else {
+    // Настройка WebApp
+    tg.expand(); // Расширяем на весь экран
+    tg.enableClosingConfirmation(); // Запрашиваем подтверждение при закрытии
+    tg.ready(); // Сообщаем, что приложение готово
+
+    // Устанавливаем тему Telegram
+    document.documentElement.style.setProperty('--tg-theme-bg-color', tg.themeParams.bg_color);
+    document.documentElement.style.setProperty('--tg-theme-text-color', tg.themeParams.text_color);
+    document.documentElement.style.setProperty('--tg-theme-hint-color', tg.themeParams.hint_color);
+    document.documentElement.style.setProperty('--tg-theme-link-color', tg.themeParams.link_color);
+    document.documentElement.style.setProperty('--tg-theme-button-color', tg.themeParams.button_color);
+    document.documentElement.style.setProperty('--tg-theme-button-text-color', tg.themeParams.button_text_color);
+
+    // Обработчик изменения темы
+    tg.onEvent('themeChanged', () => {
+        document.documentElement.style.setProperty('--tg-theme-bg-color', tg.themeParams.bg_color);
+        document.documentElement.style.setProperty('--tg-theme-text-color', tg.themeParams.text_color);
+        document.documentElement.style.setProperty('--tg-theme-hint-color', tg.themeParams.hint_color);
+        document.documentElement.style.setProperty('--tg-theme-link-color', tg.themeParams.link_color);
+        document.documentElement.style.setProperty('--tg-theme-button-color', tg.themeParams.button_color);
+        document.documentElement.style.setProperty('--tg-theme-button-text-color', tg.themeParams.button_text_color);
+    });
+
+    // Обработчик закрытия приложения
+    tg.onEvent('viewportChanged', () => {
+        if (tg.viewportHeight) {
+            document.documentElement.style.setProperty('--tg-viewport-height', `${tg.viewportHeight}px`);
+        }
+    });
+
+    // Инициализация формы
+    const eventForm = new EventForm();
+}
 
 class EventForm {
     constructor() {
@@ -210,17 +246,4 @@ class EventForm {
         
         this.eventsContainer.insertBefore(eventElement, this.eventsContainer.firstChild);
     }
-}
-
-// Initialize the form
-const eventForm = new EventForm();
-
-// Handle Telegram theme changes
-tg.onEvent('themeChanged', () => {
-    document.documentElement.style.setProperty('--tg-theme-bg-color', tg.themeParams.bg_color);
-    document.documentElement.style.setProperty('--tg-theme-text-color', tg.themeParams.text_color);
-    document.documentElement.style.setProperty('--tg-theme-hint-color', tg.themeParams.hint_color);
-    document.documentElement.style.setProperty('--tg-theme-link-color', tg.themeParams.link_color);
-    document.documentElement.style.setProperty('--tg-theme-button-color', tg.themeParams.button_color);
-    document.documentElement.style.setProperty('--tg-theme-button-text-color', tg.themeParams.button_text_color);
-}); 
+} 
