@@ -1,54 +1,44 @@
-// Initialize Telegram WebApp
+// Инициализация Telegram WebApp
 const tg = window.Telegram.WebApp;
 
-// Проверяем, что мы находимся в Telegram WebApp
-if (!tg) {
-    console.error('Telegram WebApp is not available');
-    // Можно показать сообщение пользователю или перенаправить на другую страницу
-    document.body.innerHTML = '<div class="error-message">Это приложение должно быть открыто в Telegram</div>';
-} else {
-    // Настройка WebApp
-    tg.expand(); // Расширяем на весь экран
-    tg.enableClosingConfirmation(); // Запрашиваем подтверждение при закрытии
-    tg.ready(); // Сообщаем, что приложение готово
+// Класс для управления событиями
+class EventManager {
+    constructor() {
+        this.initializeApp();
+        this.initializeEventListeners();
+        this.setMinDate();
+    }
 
-    // Устанавливаем тему Telegram
-    document.documentElement.style.setProperty('--tg-theme-bg-color', tg.themeParams.bg_color);
-    document.documentElement.style.setProperty('--tg-theme-text-color', tg.themeParams.text_color);
-    document.documentElement.style.setProperty('--tg-theme-hint-color', tg.themeParams.hint_color);
-    document.documentElement.style.setProperty('--tg-theme-link-color', tg.themeParams.link_color);
-    document.documentElement.style.setProperty('--tg-theme-button-color', tg.themeParams.button_color);
-    document.documentElement.style.setProperty('--tg-theme-button-text-color', tg.themeParams.button_text_color);
+    initializeApp() {
+        // Раскрываем на весь экран
+        tg.expand();
+        tg.enableClosingConfirmation();
 
-    // Обработчик изменения темы
-    tg.onEvent('themeChanged', () => {
+        // Настраиваем цвета под тему Telegram
+        this.updateThemeColors();
+
+        // Получаем данные пользователя
+        this.user = tg.initDataUnsafe?.user || {};
+    }
+
+    updateThemeColors() {
         document.documentElement.style.setProperty('--tg-theme-bg-color', tg.themeParams.bg_color);
         document.documentElement.style.setProperty('--tg-theme-text-color', tg.themeParams.text_color);
         document.documentElement.style.setProperty('--tg-theme-hint-color', tg.themeParams.hint_color);
         document.documentElement.style.setProperty('--tg-theme-link-color', tg.themeParams.link_color);
         document.documentElement.style.setProperty('--tg-theme-button-color', tg.themeParams.button_color);
         document.documentElement.style.setProperty('--tg-theme-button-text-color', tg.themeParams.button_text_color);
-    });
+    }
 
-    // Обработчик закрытия приложения
-    tg.onEvent('viewportChanged', () => {
-        if (tg.viewportHeight) {
-            document.documentElement.style.setProperty('--tg-viewport-height', `${tg.viewportHeight}px`);
-        }
-    });
-
-    // Инициализация формы
-    const eventForm = new EventForm();
-}
-
-class EventForm {
-    constructor() {
+    initializeEventListeners() {
+        // Элементы DOM
         this.form = document.getElementById('event-form');
         this.modal = document.getElementById('modal');
-        this.createEventBtn = document.getElementById('create-event-btn');
+        this.createEventBtn = document.getElementById('createEventBtn');
         this.cancelBtn = document.getElementById('cancel-btn');
-        this.eventsContainer = document.getElementById('events-container');
-        
+        this.eventsList = document.getElementById('eventsList');
+
+        // Поля формы
         this.fields = {
             name: document.getElementById('event-name'),
             date: document.getElementById('event-date'),
@@ -57,6 +47,7 @@ class EventForm {
             description: document.getElementById('event-description')
         };
 
+        // Элементы ошибок
         this.errorElements = {
             name: document.getElementById('name-error'),
             date: document.getElementById('date-error'),
@@ -65,20 +56,19 @@ class EventForm {
             description: document.getElementById('description-error')
         };
 
-        this.initializeEventListeners();
-        this.setMinDate();
-    }
-
-    initializeEventListeners() {
+        // Обработчики событий
         this.createEventBtn.addEventListener('click', () => this.openModal());
         this.cancelBtn.addEventListener('click', () => this.closeModal());
         this.form.addEventListener('submit', (e) => this.handleSubmit(e));
 
-        // Add input validation listeners
+        // Валидация полей
         Object.keys(this.fields).forEach(field => {
             this.fields[field].addEventListener('input', () => this.validateField(field));
             this.fields[field].addEventListener('blur', () => this.validateField(field));
         });
+
+        // Обработчик изменения темы
+        tg.onEvent('themeChanged', () => this.updateThemeColors());
     }
 
     setMinDate() {
@@ -88,7 +78,7 @@ class EventForm {
 
     openModal() {
         this.modal.classList.add('active');
-        tg.MainButton.setText('Создать мероприятие');
+        tg.MainButton.setText('Создать событие');
         tg.MainButton.show();
     }
 
@@ -204,7 +194,8 @@ class EventForm {
             date: this.fields.date.value,
             time: this.fields.time.value,
             location: this.fields.location.value,
-            description: this.fields.description.value
+            description: this.fields.description.value,
+            creator: this.user
         };
 
         try {
@@ -217,7 +208,7 @@ class EventForm {
             // Показываем уведомление об успехе
             tg.showPopup({
                 title: 'Успех',
-                message: 'Мероприятие успешно создано',
+                message: 'Событие успешно создано',
                 buttons: [{ type: 'ok' }]
             });
 
@@ -225,7 +216,7 @@ class EventForm {
         } catch (error) {
             tg.showPopup({
                 title: 'Ошибка',
-                message: 'Не удалось создать мероприятие. Попробуйте позже.',
+                message: 'Не удалось создать событие. Попробуйте позже.',
                 buttons: [{ type: 'ok' }]
             });
         }
@@ -242,8 +233,31 @@ class EventForm {
             <p class="event-date">${eventDate.toLocaleString()}</p>
             <p class="event-location">📍 ${event.location}</p>
             <p class="event-description">${event.description}</p>
+            ${event.creator ? `<p class="event-creator">👤 ${event.creator.first_name || 'Пользователь'}</p>` : ''}
         `;
         
-        this.eventsContainer.insertBefore(eventElement, this.eventsContainer.firstChild);
+        this.eventsList.insertBefore(eventElement, this.eventsList.firstChild);
     }
-} 
+
+    // Функция для загрузки событий (будет реализована позже)
+    async loadEvents() {
+        try {
+            // Здесь будет код для получения событий из базы данных
+            console.log('Loading events...');
+        } catch (error) {
+            console.error('Error loading events:', error);
+            tg.showPopup({
+                title: 'Ошибка',
+                message: 'Не удалось загрузить события',
+                buttons: [{ type: 'ok' }]
+            });
+        }
+    }
+}
+
+// Инициализация приложения при загрузке DOM
+document.addEventListener('DOMContentLoaded', () => {
+    const eventManager = new EventManager();
+    // Загружаем события при старте
+    eventManager.loadEvents();
+}); 

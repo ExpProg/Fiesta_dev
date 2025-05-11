@@ -2,71 +2,62 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="format-detection" content="telephone=no">
-    <meta name="MobileOptimized" content="176">
-    <meta name="HandheldFriendly" content="True">
-    <meta name="robots" content="noindex,nofollow">
-    <title>Fiesta - Мероприятия</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fiesta - События в Telegram</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="app-container">
-        <header class="app-header">
-            <h1>Fiesta</h1>
-        </header>
+    <div id="app">
+        <div class="header">
+            <h1>События рядом</h1>
+        </div>
+        
+        <div class="events-list" id="eventsList">
+            <!-- События будут добавляться динамически -->
+        </div>
+        
+        <button id="createEventBtn" class="button primary-button">Создать событие</button>
+    </div>
 
-        <main class="main-content">
-            <section class="events-list">
-                <h2>Ближайшие мероприятия</h2>
-                <div id="events-container">
-                    <!-- Events will be dynamically added here -->
+    <!-- Модальное окно для создания события -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <h2>Создать событие</h2>
+            <form id="event-form">
+                <div class="form-group">
+                    <label for="event-name">Название</label>
+                    <input type="text" id="event-name" required minlength="3" maxlength="100" placeholder="Введите название мероприятия">
+                    <span class="error-message" id="name-error"></span>
                 </div>
-            </section>
-
-            <button id="create-event-btn" class="primary-button">
-                Создать мероприятие
-            </button>
-        </main>
-
-        <div id="modal" class="modal">
-            <div class="modal-content">
-                <h2>Создать мероприятие</h2>
-                <form id="event-form">
-                    <div class="form-group">
-                        <label for="event-name">Название</label>
-                        <input type="text" id="event-name" required minlength="3" maxlength="100" placeholder="Введите название мероприятия">
-                        <span class="error-message" id="name-error"></span>
-                    </div>
-                    <div class="form-group">
-                        <label for="event-date">Дата</label>
-                        <input type="date" id="event-date" required>
-                        <span class="error-message" id="date-error"></span>
-                    </div>
-                    <div class="form-group">
-                        <label for="event-time">Время</label>
-                        <input type="time" id="event-time" required>
-                        <span class="error-message" id="time-error"></span>
-                    </div>
-                    <div class="form-group">
-                        <label for="event-location">Место</label>
-                        <input type="text" id="event-location" required minlength="3" maxlength="200" placeholder="Введите место проведения">
-                        <span class="error-message" id="location-error"></span>
-                    </div>
-                    <div class="form-group">
-                        <label for="event-description">Описание</label>
-                        <textarea id="event-description" required minlength="10" maxlength="1000" placeholder="Опишите мероприятие"></textarea>
-                        <span class="error-message" id="description-error"></span>
-                    </div>
-                    <div class="form-actions">
-                        <button type="button" class="secondary-button" id="cancel-btn">Отмена</button>
-                        <button type="submit" class="primary-button">Создать</button>
-                    </div>
-                </form>
-            </div>
+                <div class="form-group">
+                    <label for="event-date">Дата</label>
+                    <input type="date" id="event-date" required>
+                    <span class="error-message" id="date-error"></span>
+                </div>
+                <div class="form-group">
+                    <label for="event-time">Время</label>
+                    <input type="time" id="event-time" required>
+                    <span class="error-message" id="time-error"></span>
+                </div>
+                <div class="form-group">
+                    <label for="event-location">Место</label>
+                    <input type="text" id="event-location" required minlength="3" maxlength="200" placeholder="Введите место проведения">
+                    <span class="error-message" id="location-error"></span>
+                </div>
+                <div class="form-group">
+                    <label for="event-description">Описание</label>
+                    <textarea id="event-description" required minlength="10" maxlength="1000" placeholder="Опишите мероприятие"></textarea>
+                    <span class="error-message" id="description-error"></span>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="secondary-button" id="cancel-btn">Отмена</button>
+                    <button type="submit" class="primary-button">Создать</button>
+                </div>
+            </form>
         </div>
     </div>
+
     <script src="app.js"></script>
 </body>
 </html> 
