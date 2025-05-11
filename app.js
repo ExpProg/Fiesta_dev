@@ -1,6 +1,13 @@
 // Инициализация Telegram WebApp
 const tg = window.Telegram.WebApp;
 
+// Импорт конфигурации Supabase
+import { createClient } from '@supabase/supabase-js';
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from './config.js';
+
+// Инициализация Supabase клиента
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
 // Класс для управления событиями
 class EventManager {
     constructor() {
@@ -195,15 +202,22 @@ class EventManager {
             time: this.fields.time.value,
             location: this.fields.location.value,
             description: this.fields.description.value,
-            creator: this.user
+            creator_id: this.user?.id,
+            creator_name: this.user?.first_name || 'Пользователь',
+            created_at: new Date().toISOString()
         };
 
         try {
-            // Здесь будет отправка данных на сервер
-            console.log('Event data:', eventData);
-            
+            // Сохраняем событие в Supabase
+            const { data, error } = await supabase
+                .from('events')
+                .insert([eventData])
+                .select();
+
+            if (error) throw error;
+
             // Добавляем событие в список
-            this.addEventToList(eventData);
+            this.addEventToList(data[0]);
             
             // Показываем уведомление об успехе
             tg.showPopup({
@@ -214,6 +228,7 @@ class EventManager {
 
             this.closeModal();
         } catch (error) {
+            console.error('Error creating event:', error);
             tg.showPopup({
                 title: 'Ошибка',
                 message: 'Не удалось создать событие. Попробуйте позже.',
@@ -239,11 +254,21 @@ class EventManager {
         this.eventsList.insertBefore(eventElement, this.eventsList.firstChild);
     }
 
-    // Функция для загрузки событий (будет реализована позже)
     async loadEvents() {
         try {
-            // Здесь будет код для получения событий из базы данных
-            console.log('Loading events...');
+            const { data: events, error } = await supabase
+                .from('events')
+                .select('*')
+                .order('date', { ascending: true });
+
+            if (error) throw error;
+
+            // Очищаем список событий
+            this.eventsList.innerHTML = '';
+
+            // Добавляем события в список
+            events.forEach(event => this.addEventToList(event));
+
         } catch (error) {
             console.error('Error loading events:', error);
             tg.showPopup({
