@@ -44,6 +44,9 @@ class EventManager {
         this.createEventBtn = document.getElementById('createEventBtn');
         this.cancelBtn = document.getElementById('cancel-btn');
         this.eventsList = document.getElementById('eventsList');
+        // Элемент для отображения имени пользователя
+        this.userInfoEl = document.getElementById('user-info');
+        this.displayUserInfo();
 
         // Поля формы
         this.fields = {
@@ -276,6 +279,14 @@ class EventManager {
                 message: 'Не удалось загрузить события',
                 buttons: [{ type: 'ok' }]
             });
+        }
+    }
+
+    // Отображение имени пользователя в шапке
+    displayUserInfo() {
+        if (this.userInfoEl && this.user) {
+            const fullName = [this.user.first_name, this.user.last_name].filter(Boolean).join(' ');
+            this.userInfoEl.textContent = fullName;
         }
     }
 }

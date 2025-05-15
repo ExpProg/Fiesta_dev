@@ -39,6 +39,13 @@ body {
     font-weight: 600;
 }
 
+.user-info {
+    font-size: 14px;
+    color: var(--tg-theme-hint-color);
+    text-align: center;
+    margin-top: 4px;
+}
+
 .events-list {
     display: flex;
     flex-direction: column;
