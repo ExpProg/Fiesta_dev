@@ -17,6 +17,8 @@ class EventManager {
     }
 
     initializeApp() {
+        // Уведомляем Telegram, что веб-приложение готово к работе
+        tg.ready();
         // Раскрываем на весь экран
         tg.expand();
         tg.enableClosingConfirmation();
